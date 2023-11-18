@@ -45,13 +45,8 @@ import {
 //   SelectTrigger,
 //   SelectValue,
 // } from "@/components/ui/select";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@radix-ui/react-select";
+import Select from "react-select";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -86,26 +81,33 @@ const formAddSchema = z.object({
 });
 
 const formSetorSchema = z.object({
-  kode_barang: z.string().regex(/^[A-Z0-9]+-?[A-Z0-9]*$/, {
-    message:
-      "Kode Barang harus berupa kombinasi huruf kapital dan angka, dengan tanda hubung ('-') yang opsional. Contoh: 'ABC123', 'ABC-1234', 'A1', 'A-1', dll.",
+  kode_barang: z.string().nonempty({
+    message: "Kode barang tidak boleh kosong.",
   }),
-  nama_barang: z.string().min(5, {
-    message: "Nama Barang harus lebih dari 5 karakter.",
-  }),
-  jumlah_barang: z.string().regex(/^[1-9][0-9]*$/, {
+  idvendor: z.number(),
+  jumlah: z.string().regex(/^[1-9][0-9]*$/, {
     message:
-      "Jumlah Barang harus berupa angka positif dan tidak boleh dimulai dengan angka 0.",
+      "Jumlah Barang Dibeli harus berupa angka positif dan tidak boleh dimulai dengan angka 0.",
   }),
-  harga_barang: z.string().regex(/^(0|[1-9][0-9]*)$/, {
-    message:
-      "Harga Barang tidak boleh memiliki angka 0 di depan kecuali nilai 0 itu sendiri.",
+  totalharga: z.string().min(0, {
+    message: "Total harga tidak boleh negatif.",
+  }),
+  tanggal_pembelian: z.string().nonempty({
+    message: "Tanggal pembelian tidak boleh kosong.",
   }),
 });
 
 // Funtions
 async function fetchMasterBarang() {
   const { data, error } = await supabase.from("master_barang").select("*");
+  if (error) {
+    throw new Error("Could not fetch master_barang");
+  }
+  return data;
+}
+
+async function fetchVendor() {
+  const { data, error } = await supabase.from("vendor").select("*");
   if (error) {
     throw new Error("Could not fetch master_barang");
   }
@@ -155,9 +157,34 @@ async function addBarang(kodebarang, nama_barang, stok_barang, harga_jual) {
   console.log("Barang added:", data);
 }
 
+async function addSetorPembelian(
+  jumlah,
+  tanggal_pembelian,
+  totalharga,
+  idvendor,
+  kodebarang
+) {
+  const { data, error, status } = await supabase
+    .from("pembelian_barang")
+    .insert([{ jumlah, tanggal_pembelian, totalharga, idvendor, kodebarang }]);
+
+  if (error) {
+    console.error("Error adding data:", error);
+    return;
+  }
+
+  if (status === 201) {
+    toast.success(`Berhasil menyetorkan barang`);
+  } else {
+    toast.error(`Maaf ada kesalahan ketika menyetorkan barang`);
+  }
+
+  console.log("Barang added:", data);
+}
+
 // HEADER + POPUP SETOR / TAMBAH
 
-const HeaderPageAndAddProduct = ({ data, namaHalaman, desc }) => {
+const HeaderPageAndAddProduct = ({ data, namaHalaman, desc, vendor }) => {
   return (
     <div className="sm:flex sm:items-center sm:justify-between mt-12">
       <div>
@@ -175,7 +202,11 @@ const HeaderPageAndAddProduct = ({ data, namaHalaman, desc }) => {
       </div>
 
       <div className="flex items-center mt-4 gap-x-3">
-        <PopUpAddSetorProduct namaHalaman={namaHalaman} />
+        <PopUpAddSetorProduct
+          namaHalaman={namaHalaman}
+          dataExisitngProduk={data}
+          dataVendor={vendor}
+        />
         <PopUpAddProduct namaHalaman={namaHalaman} />
       </div>
     </div>
@@ -313,27 +344,52 @@ function PopUpAddProduct({ namaHalaman, fungsi }) {
             </div>
           </form>
         </Form>
-        {/* <DialogFooter>
-          <Button type="submit">Tambah Barang</Button>
-        </DialogFooter> */}
       </DialogContent>
     </Dialog>
   );
 }
 
-function PopUpAddSetorProduct({
-  namaHalaman,
-  fungsi,
-  dataExisitngProduk,
-  dataVendor,
-}) {
+function PopUpAddSetorProduct({ namaHalaman, dataExisitngProduk, dataVendor }) {
   const form = useForm({
     resolver: zodResolver(formSetorSchema),
-    defaultValues: {},
+    defaultValues: {
+      kode_barang: "", // nilai awal sebagai string kosong
+      idvendor: "", // sesuaikan dengan tipe data yang diharapkan
+      jumlah: "",
+      totalharga: "",
+      tanggal_pembelian: "",
+    },
   });
   function onSubmit(values) {
-    console.log(values);
+    const JumlahBeli = values.jumlah;
+    const TanggalPembelian = values.tanggal_pembelian;
+    const IDkodeBarang = values.kode_barang;
+    const IDVendor = values.idvendor;
+    const TotalHarga = values.totalharga;
+    addSetorPembelian(
+      JumlahBeli,
+      TanggalPembelian,
+      TotalHarga,
+      IDVendor,
+      IDkodeBarang
+    );
+    console.log(
+      JumlahBeli,
+      TanggalPembelian,
+      TotalHarga,
+      IDVendor,
+      IDkodeBarang
+    );
   }
+
+  const productOptions = dataExisitngProduk?.map((product) => ({
+    value: product.kodebarang,
+    label: product.nama_barang,
+  }));
+  const vendorOptions = dataVendor?.map((vendor) => ({
+    value: vendor.idvendor,
+    label: vendor.nama_vendor,
+  }));
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -354,53 +410,86 @@ function PopUpAddSetorProduct({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="username" className="text-right">
-                  Kode Barang
-                </Label>
-                {/* <SelectSetorBarang data={dataExisitngProduk} /> */}
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="username" className="text-right">
-                  Vendor
-                </Label>
-
-                {/* <SelectSetorBarang data={dataVendor} /> */}
-              </div>
-
-              {/* <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Jumlah Yang Dibeli
-                </Label>
-                <Input
-                  id="username"
-                  defaultValue="@peduarte"
-                  className="col-span-3"
-                  type="number"
-                />
-              </div> */}
               <FormField
                 control={form.control}
                 name="kode_barang"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Jumlah Dibeli</FormLabel>
+                    <FormLabel>Kode Barang</FormLabel>
                     <FormControl>
-                      <Input placeholder="45" {...field} />
-                    </FormControl>
+                      <Controller
+                        name="kode_barang"
+                        control={form.control}
+                        render={({ field }) => {
+                          // Menentukan nilai yang dipilih berdasarkan field.value
+                          const selectedValue = productOptions.find(
+                            (option) => option.value === field.value
+                          );
 
+                          return (
+                            <Select
+                              {...field}
+                              options={productOptions}
+                              value={selectedValue}
+                              onChange={(option) =>
+                                field.onChange(option.value)
+                              }
+                            />
+                          );
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Pilih Produk yang ingin ditambah stok nya
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
                 control={form.control}
-                name="tanggal_pembelian"
+                name="idvendor"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tanggal Pembelian</FormLabel>
+                    <FormLabel>Vendor</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Controller
+                        name="idvendor"
+                        control={form.control}
+                        render={({ field }) => {
+                          // Menentukan nilai yang dipilih berdasarkan field.value
+                          const selectedValue = vendorOptions.find(
+                            (option) => option.value === field.value
+                          );
+
+                          return (
+                            <Select
+                              {...field}
+                              options={vendorOptions}
+                              value={selectedValue}
+                              onChange={(option) =>
+                                field.onChange(option.value)
+                              }
+                            />
+                          );
+                        }}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Pilih Produk yang ingin ditambah stok nya
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="jumlah"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Jumlah Kuantitas</FormLabel>
+                    <FormControl>
+                      <Input placeholder="45" type="number" {...field} />
                     </FormControl>
 
                     <FormMessage />
@@ -409,14 +498,14 @@ function PopUpAddSetorProduct({
               />
               <FormField
                 control={form.control}
-                name="total_harga"
+                name="totalharga"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Total Harga</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="Rp.140.000"
+                        placeholder="Rp.100.000"
                         {...field}
                       />
                     </FormControl>
@@ -425,78 +514,30 @@ function PopUpAddSetorProduct({
                   </FormItem>
                 )}
               />
+              <div>
+                <Label htmlFor="tanggal_pembelian">Tanggal Pembelian</Label>
+                <Controller
+                  control={form.control}
+                  name="tanggal_pembelian"
+                  render={({ field: { onChange, value } }) => (
+                    <Input
+                      type="date"
+                      onChange={onChange}
+                      value={value ?? ""} // Ensure value is never undefined
+                    />
+                  )}
+                />
+              </div>
+              <Button type="submit" className="mt-4 py-6">
+                Tambahkan Setoran Produk
+              </Button>
             </div>
           </form>
         </Form>
-
-        <DialogFooter>
-          <Button type="submit">Setor Produk</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-
-// function SelectSetorBarang({ data }) {
-//   return (
-//     <Select>
-//       <SelectTrigger className="min-w-[425px]">
-//         <SelectValue placeholder="Select a fruit" />
-//       </SelectTrigger>
-//       <SelectContent>
-//         <SelectGroup>
-//           <SelectLabel>Fruits</SelectLabel>
-//           <SelectItem value="apple">Apple</SelectItem>
-//           <SelectItem value="banana">Banana</SelectItem>
-//           <SelectItem value="blueberry">Blueberry</SelectItem>
-//           <SelectItem value="grapes">Grapes</SelectItem>
-//           <SelectItem value="pineapple">Pineapple</SelectItem>
-//         </SelectGroup>
-//       </SelectContent>
-//     </Select>
-//   );
-// }
-
-// const SelectController = ({ control, name, label, options }) => {
-//   return (
-//     <Controller
-//       control={control}
-//       name={name}
-//       render={({ field: { onChange, onBlur, value, ref } }) => (
-//         <Select onValueChange={onChange} value={value} ref={ref}>
-//           {options.map((option) => (
-//             <SelectItem key={option.value} value={option.value}>
-//               {option.label}
-//             </SelectItem>
-//           ))}
-//         </Select>
-//       )}
-//     />
-//   );
-// };
-
-const SelectController = ({ control, name, options }) => {
-  return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field: { onChange, value } }) => (
-        <Select onValueChange={onChange} value={value}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      )}
-    />
-  );
-};
 
 // KOMPONEN + PAGE
 
@@ -506,6 +547,12 @@ function Produk() {
     queryKey: ["master_barang"],
     queryFn: fetchMasterBarang,
   });
+  const { data: vendorData, error: fetchError2 } = useQuery({
+    queryKey: ["vendor"],
+    queryFn: fetchVendor,
+  });
+
+  console.log("vendor data", vendorData);
 
   // refresh
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -593,6 +640,7 @@ function Produk() {
         <div className="max-w-5xl mx-auto">
           <HeaderPageAndAddProduct
             data={masterBarang}
+            vendor={vendorData}
             namaHalaman="Produk"
             desc="Berikut adalah daftar produk yang tersedia di perusahaan ini."
           />
