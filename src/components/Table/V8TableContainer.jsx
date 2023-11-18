@@ -13,6 +13,7 @@ import {
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
 } from "@tanstack/react-table";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const V8TableContainer = ({ data, columns, searching, setSearching }) => {
   const defaultData = useMemo(() => [], []);
@@ -63,43 +64,20 @@ const V8TableContainer = ({ data, columns, searching, setSearching }) => {
     setTable(table); // Menyimpan instance table ke store
   }, [table]);
 
+  // Fungsi untuk menghandle perpindahan halaman
+  const nextPage = () => {
+    if (table.getState().pagination.pageIndex < table.getPageCount() - 1) {
+      table.setPageIndex(table.getState().pagination.pageIndex + 1);
+    }
+  };
+
+  const previousPage = () => {
+    if (table.getState().pagination.pageIndex > 0) {
+      table.setPageIndex(table.getState().pagination.pageIndex - 1);
+    }
+  };
+
   return (
-    // <table className="min-w-full divide-y divide-gray-200">
-    //   <thead>
-    //     {table.getHeaderGroups().map((headerGroup) => (
-    //       <tr key={headerGroup.id}>
-    //         {headerGroup.headers.map((header) => (
-    //           <th
-    //             key={header.id}
-    //             className="px-6 py-3 text-left text-xs font-medium text-gray-500
-    //             uppercase tracking-wider"
-    //           >
-    //             {header.isPlaceholder
-    //               ? null
-    //               : flexRender(
-    //                   header.column.columnDef.header,
-    //                   header.getContext()
-    //                 )}
-    //           </th>
-    //         ))}
-    //       </tr>
-    //     ))}
-    //   </thead>
-    //   <tbody>
-    //     {table.getRowModel().rows.map((row) => (
-    //       <tr key={row.id}>
-    //         {row.getVisibleCells().map((cell) => (
-    //           <td
-    //             key={cell.id}
-    //             className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-    //           >
-    //             {flexRender(cell.column.columnDef.cell, cell.getContext())}
-    //           </td>
-    //         ))}
-    //       </tr>
-    //     ))}
-    //   </tbody>
-    // </table>
     <div className="flex flex-col mt-6 mb-12">
       <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -148,6 +126,31 @@ const V8TableContainer = ({ data, columns, searching, setSearching }) => {
             </table>
           </div>
         </div>
+      </div>
+      <div className="flex justify-between items-center my-4">
+        <button
+          onClick={previousPage}
+          className="p-2 text-gray-600 hover:text-gray-800 dark:hover:text-white"
+          disabled={table.getState().pagination.pageIndex === 0}
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <span>
+          Page{" "}
+          <strong>
+            {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </strong>
+        </span>
+        <button
+          onClick={nextPage}
+          className="p-2 text-gray-600 hover:text-gray-800 dark:hover:text-white"
+          disabled={
+            table.getState().pagination.pageIndex >= table.getPageCount() - 1
+          }
+        >
+          <ChevronRight size={20} />
+        </button>
       </div>
     </div>
   );
