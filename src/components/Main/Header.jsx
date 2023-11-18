@@ -22,7 +22,7 @@ function Header() {
   };
 
   return (
-    <header className="text-sm py-2 bg-green_light">
+    <header className="text-sm py-2 bg-[#e6e5df]">
       <div className="flex justify-between max-w-5xl mx-auto items-center">
         <Link to="/">
           <img src={Logo} alt="logo" className="max-w-[185px]" />

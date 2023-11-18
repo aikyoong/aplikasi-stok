@@ -75,7 +75,7 @@ const productRoute = new Route({
 
 const customerRoute = new Route({
   getParentRoute: () => rootRoute,
-  path: "/pelanggan",
+  path: "/konsumen",
   component: Customer,
 });
 const salesRoute = new Route({

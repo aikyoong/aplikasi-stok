@@ -36,15 +36,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectLabel,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@radix-ui/react-select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -54,13 +61,31 @@ import SearchAndFiltering from "@/components/aikyong_pages/Search";
 import toast from "react-hot-toast";
 import supabase from "@/config/supabaseClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ListPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 
-const formSchema = z.object({
+const formAddSchema = z.object({
+  kode_barang: z.string().regex(/^[A-Z0-9]+-?[A-Z0-9]*$/, {
+    message:
+      "Kode Barang harus berupa kombinasi huruf kapital dan angka, dengan tanda hubung ('-') yang opsional. Contoh: 'ABC123', 'ABC-1234', 'A1', 'A-1', dll.",
+  }),
+  nama_barang: z.string().min(5, {
+    message: "Nama Barang harus lebih dari 5 karakter.",
+  }),
+  jumlah_barang: z.string().regex(/^[1-9][0-9]*$/, {
+    message:
+      "Jumlah Barang harus berupa angka positif dan tidak boleh dimulai dengan angka 0.",
+  }),
+  harga_barang: z.string().regex(/^(0|[1-9][0-9]*)$/, {
+    message:
+      "Harga Barang tidak boleh memiliki angka 0 di depan kecuali nilai 0 itu sendiri.",
+  }),
+});
+
+const formSetorSchema = z.object({
   kode_barang: z.string().regex(/^[A-Z0-9]+-?[A-Z0-9]*$/, {
     message:
       "Kode Barang harus berupa kombinasi huruf kapital dan angka, dengan tanda hubung ('-') yang opsional. Contoh: 'ABC123', 'ABC-1234', 'A1', 'A-1', dll.",
@@ -159,7 +184,7 @@ const HeaderPageAndAddProduct = ({ data, namaHalaman, desc }) => {
 
 function PopUpAddProduct({ namaHalaman, fungsi }) {
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formAddSchema),
     defaultValues: {
       kode_barang: "", // Nilai default untuk kode_barang
       nama_barang: "", // Nilai default untuk nama_barang
@@ -302,25 +327,19 @@ function PopUpAddSetorProduct({
   dataExisitngProduk,
   dataVendor,
 }) {
+  const form = useForm({
+    resolver: zodResolver(formSetorSchema),
+    defaultValues: {},
+  });
+  function onSubmit(values) {
+    console.log(values);
+  }
   return (
     <Dialog>
       <DialogTrigger asChild>
         {/* <Button variant="outline">Edit Profile</Button> */}
         <button className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide blue-500 transition-colors duration-200 border-2 border-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            className="w-5 h-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <ListPlus />
 
           <span>Setor {namaHalaman}</span>
         </button>
@@ -332,56 +351,84 @@ function PopUpAddSetorProduct({
             Setor produk hasil pembelian dari Vendor
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Kode Barang
-            </Label>
-            <SelectProductAdd data={dataExisitngProduk} />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Vendor
-            </Label>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="username" className="text-right">
+                  Kode Barang
+                </Label>
+                {/* <SelectSetorBarang data={dataExisitngProduk} /> */}
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="username" className="text-right">
+                  Vendor
+                </Label>
 
-            <SelectProductAdd data={dataVendor} />
-          </div>
+                {/* <SelectSetorBarang data={dataVendor} /> */}
+              </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Jumlah Yang Dibeli
-            </Label>
-            <Input
-              id="username"
-              defaultValue="@peduarte"
-              className="col-span-3"
-              type="number"
-            />
-          </div>
+              {/* <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Jumlah Yang Dibeli
+                </Label>
+                <Input
+                  id="username"
+                  defaultValue="@peduarte"
+                  className="col-span-3"
+                  type="number"
+                />
+              </div> */}
+              <FormField
+                control={form.control}
+                name="kode_barang"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Jumlah Dibeli</FormLabel>
+                    <FormControl>
+                      <Input placeholder="45" {...field} />
+                    </FormControl>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Tanggal Pembelian
-            </Label>
-            <Input
-              id="username"
-              // defaultValue="@peduarte"
-              className="col-span-3"
-              type="date"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="username" className="text-right">
-              Total Harga
-            </Label>
-            <Input
-              id="username"
-              defaultValue="@peduarte"
-              className="col-span-3"
-              type="number"
-            />
-          </div>
-        </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tanggal_pembelian"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tanggal Pembelian</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="total_harga"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total Harga</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Rp.140.000"
+                        {...field}
+                      />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </form>
+        </Form>
+
         <DialogFooter>
           <Button type="submit">Setor Produk</Button>
         </DialogFooter>
@@ -390,25 +437,66 @@ function PopUpAddSetorProduct({
   );
 }
 
-function SelectProductAdd({ data }) {
+// function SelectSetorBarang({ data }) {
+//   return (
+//     <Select>
+//       <SelectTrigger className="min-w-[425px]">
+//         <SelectValue placeholder="Select a fruit" />
+//       </SelectTrigger>
+//       <SelectContent>
+//         <SelectGroup>
+//           <SelectLabel>Fruits</SelectLabel>
+//           <SelectItem value="apple">Apple</SelectItem>
+//           <SelectItem value="banana">Banana</SelectItem>
+//           <SelectItem value="blueberry">Blueberry</SelectItem>
+//           <SelectItem value="grapes">Grapes</SelectItem>
+//           <SelectItem value="pineapple">Pineapple</SelectItem>
+//         </SelectGroup>
+//       </SelectContent>
+//     </Select>
+//   );
+// }
+
+// const SelectController = ({ control, name, label, options }) => {
+//   return (
+//     <Controller
+//       control={control}
+//       name={name}
+//       render={({ field: { onChange, onBlur, value, ref } }) => (
+//         <Select onValueChange={onChange} value={value} ref={ref}>
+//           {options.map((option) => (
+//             <SelectItem key={option.value} value={option.value}>
+//               {option.label}
+//             </SelectItem>
+//           ))}
+//         </Select>
+//       )}
+//     />
+//   );
+// };
+
+const SelectController = ({ control, name, options }) => {
   return (
-    <Select>
-      <SelectTrigger className="min-w-[425px]">
-        <SelectValue placeholder="Select a fruit" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectGroup>
-          <SelectLabel>Fruits</SelectLabel>
-          <SelectItem value="apple">Apple</SelectItem>
-          <SelectItem value="banana">Banana</SelectItem>
-          <SelectItem value="blueberry">Blueberry</SelectItem>
-          <SelectItem value="grapes">Grapes</SelectItem>
-          <SelectItem value="pineapple">Pineapple</SelectItem>
-        </SelectGroup>
-      </SelectContent>
-    </Select>
+    <Controller
+      control={control}
+      name={name}
+      render={({ field: { onChange, value } }) => (
+        <Select onValueChange={onChange} value={value}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
+    />
   );
-}
+};
 
 // KOMPONEN + PAGE
 

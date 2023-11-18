@@ -30,9 +30,9 @@ function SideNavHorz() {
 
     {
       key: "pelanggan",
-      label: "Pelanggan",
+      label: "Konsumen",
       icon: <LocateFixed />,
-      to: "/pelanggan",
+      to: "/konsumen",
     },
     {
       key: "penjualan",
