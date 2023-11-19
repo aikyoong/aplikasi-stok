@@ -1,12 +1,5 @@
 import Layout from "@/components/Layout";
 import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Menubar,
   MenubarContent,
   MenubarItem,
@@ -15,7 +8,6 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,7 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import {
   Dialog,
   DialogContent,
@@ -36,32 +27,23 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectGroup,
-//   SelectItem,
-//   SelectLabel,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-import Select from "react-select";
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-import { useState, useMemo } from "react";
 import V8TableContainer from "@/components/Table/V8TableContainer";
 import SearchAndFiltering from "@/components/aikyong_pages/Search";
+
+import Select from "react-select";
 import toast from "react-hot-toast";
 import supabase from "@/config/supabaseClient";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, ListPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
 
+// SCHEMA VALIDATION
 const formAddSchema = z.object({
   kode_barang: z.string().regex(/^[A-Z0-9]+-?[A-Z0-9]*$/, {
     message:
@@ -97,7 +79,7 @@ const formSetorSchema = z.object({
   }),
 });
 
-// Funtions
+// FUNCTIONS
 async function fetchMasterBarang() {
   const { data, error } = await supabase.from("master_barang").select("*");
   if (error) {
@@ -114,11 +96,11 @@ async function fetchVendor() {
   return data;
 }
 
-async function deleteBarang(kodeBarang) {
+async function deleteProduct(IDVendor) {
   const { data, error, status } = await supabase
     .from("master_barang") // Menggunakan tabel master_barang
     .delete()
-    .match({ kodebarang: kodeBarang }); // Menghapus baris berdasarkan kodebarang
+    .match({ idvendor: IDVendor }); // Menghapus baris berdasarkan kodebarang
 
   if (error) {
     console.error("Error deleting data:", error);
@@ -183,7 +165,6 @@ async function addSetorPembelian(
 }
 
 // HEADER + POPUP SETOR / TAMBAH
-
 const HeaderPageAndAddProduct = ({ data, namaHalaman, desc, vendor }) => {
   return (
     <div className="sm:flex sm:items-center sm:justify-between mt-12">
@@ -540,7 +521,6 @@ function PopUpAddSetorProduct({ namaHalaman, dataExisitngProduk, dataVendor }) {
 }
 
 // KOMPONEN + PAGE
-
 function Produk() {
   // Fetching
   const { data: masterBarang, error: fetchError } = useQuery({
@@ -551,8 +531,6 @@ function Produk() {
     queryKey: ["vendor"],
     queryFn: fetchVendor,
   });
-
-  console.log("vendor data", vendorData);
 
   // refresh
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -569,7 +547,7 @@ function Produk() {
     setSearching(value);
   };
 
-  // Column
+  // Column Produk
   const columns = useMemo(
     () => [
       {
@@ -620,7 +598,7 @@ function Produk() {
                   </div>
                 </MenubarTrigger>
                 <MenubarContent>
-                  <MenubarItem onClick={() => deleteBarang(KodeBarangEachRow)}>
+                  <MenubarItem onClick={() => deleteProduct(KodeBarangEachRow)}>
                     Hapus
                   </MenubarItem>
                 </MenubarContent>
