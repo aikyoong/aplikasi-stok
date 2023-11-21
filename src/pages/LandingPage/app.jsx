@@ -1,17 +1,19 @@
 import Layout from "@/components/Layout";
-import Hero from "@/components/landingpage/Hero";
+import Hero from "./images/hero.jpg";
+import Visi from "./images/visi.jpg";
+import Karyawan from "./images/karyawan.jpg";
+import Contact from "./images/contact.jpg";
 
-import Feature from "@/components/landingpage/Feature";
-import ChooseUs from "@/components/landingpage/ChooseUs";
-import Interest from "@/components/landingpage/Interest";
-
-export default function Landing() {
+function Landing() {
+  // return <Layout>LandingPagfe</Layout>;
   return (
-    <Layout>
-      <Hero />
-      <Feature />
-      <ChooseUs />
-      <Interest />
-    </Layout>
+    <>
+      <img src={Hero} alt="heo image" className="min-h-screen" />
+      <img src={Visi} alt="heo image" className="min-h-screen" />
+      <img src={Karyawan} alt="heo image" className="min-h-screen" />
+      <img src={Contact} alt="heo image" className="min-h-screen" />
+    </>
   );
 }
+
+export default Landing;

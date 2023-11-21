@@ -9,7 +9,8 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useForm, FormProvider } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import supabase from "@/config/supabaseClient";
-
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import useAuth from "@/store/useAuth";
 
@@ -37,6 +38,7 @@ async function LoginApp(email, password) {
 }
 
 function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false); // State untuk mengontrol tampilan password
   const methods = useForm({
     mode: "onTouched",
     resolver: zodResolver(ValidationSchemaLogin),
@@ -132,7 +134,7 @@ function LoginPage() {
                       {errors?.email?.message}
                     </p>
                   </div>
-                  <div>
+                  {/* <div>
                     <Label
                       htmlFor="password"
                       className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -150,6 +152,33 @@ function LoginPage() {
                     <p className="text-xs text-red-500">
                       {errors?.password?.message}
                     </p>
+                  </div> */}
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"} // Menggunakan "text" atau "password" sesuai dengan showPassword
+                      name="password"
+                      id="password"
+                      placeholder="••••••••••••"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                      required=""
+                    />
+                    <input
+                      type="checkbox"
+                      id="showPassword"
+                      className="hidden"
+                      checked={showPassword}
+                      onChange={() => setShowPassword(!showPassword)}
+                    />
+                    <label
+                      htmlFor="showPassword"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3  cursor-pointer"
+                    >
+                      {showPassword ? (
+                        <EyeOff size={20} className="text-xl text-gray-500" />
+                      ) : (
+                        <Eye size={20} className="text-xl text-gray-500" />
+                      )}
+                    </label>
                   </div>
                   {/* <div className="flex items-center justify-between">
                     <div className="flex items-start">

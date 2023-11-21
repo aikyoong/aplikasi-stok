@@ -2,7 +2,7 @@ import { Router, Route, RootRoute, redirect } from "@tanstack/react-router";
 import useAuth from "@/store/useAuth";
 import Root from "./RootRouterWrapper";
 import Login from "@/pages/auth/Login";
-
+import Landing from "@/pages/landingpage/app";
 import Team from "@/pages/apps/Team";
 import Customer from "@/pages/apps/Customer";
 import Produk from "@/pages/apps/Product";
@@ -15,11 +15,11 @@ const rootRoute = new RootRoute({
 });
 
 // Index (App.tsx) route : Route
-// const indexRoute = new Route({
-//   getParentRoute: () => rootRoute,
-//   path: "/",
-//   component: Landing,
-// });
+const indexRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/",
+  component: Landing,
+});
 
 // About (pricing-page.tsx) route
 // const pricingPage = new Route({
@@ -101,6 +101,7 @@ const privateLayout = new Route({
 // Create the router using your route tree
 export const router = new Router({
   routeTree: rootRoute.addChildren([
+    indexRoute,
     loginPage,
     timRoute,
     productRoute,
