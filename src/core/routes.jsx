@@ -1,8 +1,8 @@
+import Landing from "@/pages/landingpage/app";
 import { Router, Route, RootRoute } from "@tanstack/react-router";
 
 import Root from "./RootRouterWrapper";
 import Login from "@/pages/auth/Login";
-import Landing from "@/pages/landingpage/app";
 import Team from "@/pages/apps/Team";
 import Customer from "@/pages/apps/Customer";
 import Produk from "@/pages/apps/Product";

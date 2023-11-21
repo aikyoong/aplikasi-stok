@@ -1,7 +1,7 @@
 import "./index.css";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import QueryRouterApp from "./core/route/QueryRouterApp";
+import QueryRouterApp from "./core/QueryRouterApp";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // import { QueryClient, QueryClientProvider } from "react-query";
 // Render our app!
