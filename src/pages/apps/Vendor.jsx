@@ -36,12 +36,15 @@ import Select from "react-select";
 import toast from "react-hot-toast";
 import supabase from "@/config/supabaseClient";
 import { useState, useMemo } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RefreshCw, ListPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import * as z from "zod";
+
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import useAuth from "@/store/useAuth";
+import { Outlet, redirect, useNavigate } from "@tanstack/react-router";
 
 // SCHEMA VALIDATION
 const formAddSchema = z.object({
@@ -218,6 +221,14 @@ function PopUpAddVendor({ namaHalaman }) {
 
 // KOMPONEN + PAGE
 function Vendor() {
+  const navigate = useNavigate({ from: "/vendor" });
+
+  const { isLoggedIn, userInfo, login, logout } = useAuth();
+  if (isLoggedIn === false) {
+    setTimeout(() => {
+      navigate({ to: "/" });
+    }, 1200);
+  }
   // Fetching
   const { data: dataVendor, error: fetchError } = useQuery({
     queryKey: ["vendor"],

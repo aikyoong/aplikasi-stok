@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import useAuth from "@/store/useAuth";
+
 import SideNavHorz from "../sidenav/SideNavHorz";
 
 function Header() {
@@ -27,7 +28,7 @@ function Header() {
         <Link to="/">
           <img src={Logo} alt="logo" className="max-w-[185px]" />
         </Link>
-        <p className="text-lg">
+        <p className="text-2xl font-philoshoper">
           General Trading Company & Distribution Plastic
         </p>
         <NavigationMenus />

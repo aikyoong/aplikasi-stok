@@ -90,8 +90,8 @@ function Team() {
     []
   );
 
-  console.log("supabase", supabase);
-  console.log("dataTim", dataTim);
+  // console.log("supabase", supabase);
+  // console.log("dataTim", dataTim);
   return (
     <Layout>
       <p>{fetchError && `${fetchError}`}</p>

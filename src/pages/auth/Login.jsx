@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useForm, FormProvider } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
+import supabase from "@/config/supabaseClient";
 
 import axios from "axios";
 import useAuth from "@/store/useAuth";
@@ -23,6 +24,18 @@ const ValidationSchemaLogin = z.object({
   // rememberCheck: z.boolean(),
 });
 
+// FUNCTIONS
+async function LoginApp(email, password) {
+  let { data, error } = await supabase.auth.signInWithPassword({
+    email: `${email}`,
+    password: `${password}`,
+  });
+  if (error) {
+    throw new Error("Could not login");
+  }
+  return data;
+}
+
 function LoginPage() {
   const methods = useForm({
     mode: "onTouched",
@@ -33,7 +46,7 @@ function LoginPage() {
   const { handleSubmit, formState } = methods;
   const { errors } = formState;
 
-  const navigate = useNavigate({ from: "/login" });
+  const navigate = useNavigate({ from: "/masuk" });
   // console.log("ini lication dari useNavigate", location);
 
   const Success = () => {
@@ -42,21 +55,24 @@ function LoginPage() {
 
   const { isLoggedIn, authUser, login, logout } = useAuth();
 
-  console.log("aaa", authUser);
+  console.log("Isi Auth", authUser ?? "Belum login");
 
   if (isLoggedIn === true) {
     setTimeout(() => {
-      navigate({ to: "/clientarea/my-apps-and-subs" });
+      navigate({ to: "/produk" });
     }, 1950);
   }
 
   const onSubmit = async (data) => {
     console.log("yang disubmit", data);
+
+    // LoginApp(email, password);
     try {
-      const { email, password } = data;
       // Periksa apakah formulir valid sebelum memanggil login
+      const { email, password } = data;
       const isValid = await methods.trigger();
       if (isValid) {
+        // await LoginApp(email, password);
         await login(email, password);
       }
     } catch (error) {
@@ -179,38 +195,3 @@ function LoginPage() {
 }
 
 export default LoginPage;
-
-// extracting the type
-// type ValidSchemaLogin = z.infer<typeof ValidationSchemaLogin>;
-
-// useForm<ValidSchemaLogin>
-
-// const authenticate = async (e) => {
-//   try {
-//     e.preventDefault();
-//     const formData = new URLSearchParams();
-//     formData.append("url", "http://172.16.35.43:8059");
-//     formData.append("db", "SAAS");
-//     formData.append("username", "r@saas-studios.com");
-//     formData.append("password", "Youknowm@3");
-//     formData.append("model", "res.users");
-
-//     const config = {
-//       method: "post",
-//       maxBodyLength: Infinity,
-//       url: "http://mid.tachyon.net.id/api/prod/auth",
-//       headers: {
-//         "Content-Type": "application/x-www-form-urlencoded",
-//       },
-//       data: formData,
-//     };
-
-//     const response = await axios.request(config);
-//     console.log(response.data);
-//     toast.success("Your login is success");
-//     // if (response.code === 200) {
-//     // }
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };

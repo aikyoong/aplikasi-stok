@@ -3,15 +3,6 @@ import useAuth from "@/store/useAuth";
 import Root from "./RootRouterWrapper";
 import Login from "@/pages/auth/Login";
 
-import Landing from "@/pages/LandingPage/app";
-import ClientArea from "@/pages/clientarea/ClientArea";
-import PricingPage from "@/pages/LandingPage/pricing/Pricing";
-import Order from "@/pages/LandingPage/order/Order";
-import ThxOrder from "@/pages/LandingPage/order/ThxOrder";
-
-import InvoiceDetail from "@/components/clientarea/InvoiceDetail";
-import SubsApp from "@/components/clientarea/SubsApp";
-
 import Team from "@/pages/apps/Team";
 import Customer from "@/pages/apps/Customer";
 import Produk from "@/pages/apps/Product";
