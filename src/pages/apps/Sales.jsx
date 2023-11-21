@@ -51,7 +51,7 @@ const formSetorSchema = z.object({
       "Jumlah Total Harga Transaksi harus berupa angka positif dan tidak boleh dimulai dengan angka 0.",
   }),
   idkonsumen: z.number(),
-  tanggaltransaksi: z.string().refine((data) => !isNaN(Date.parse(data)), {
+  tanggaltransaksi: z.number().refine((data) => !isNaN(Date.parse(data)), {
     message: "Invalid date format",
   }),
   statuspembayaran: z.string(),
@@ -165,12 +165,6 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
   });
 
   function onSubmit(values) {
-    // const JumlahBeli = values.jumlah;
-    // const TanggalPembelian = values.tanggal_pembelian;
-    // const IDkodeBarang = values.kode_barang;
-    // const IDVendor = values.idvendor;
-    // const TotalHarga = values.totalharga;
-
     const {
       totalitem,
       totalharga,
@@ -187,14 +181,6 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
       statuspembayaran
     );
 
-    console.log(
-      idkonsumen,
-      statuspembayaran,
-      tanggaltransaksi,
-      totalharga,
-      totalitem
-    );
-
     console.log("On Submitsss", values);
   }
 
@@ -205,14 +191,12 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        {/* <Button variant="outline">Edit Profile</Button> */}
         <button className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide blue-500 transition-colors duration-200 border-2 border-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600">
           <ListPlus />
-
-          <span> {namaHalaman}</span>
+          <span>{namaHalaman}</span>
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[525px] ">
+      <DialogContent className="sm:max-w-[525px] h-[425px] overflow-auto">
         <DialogHeader>
           <DialogTitle>Transaksi Penjualan</DialogTitle>
           <DialogDescription>
@@ -227,7 +211,7 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
                 name="totalitem"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Jumlah Item Yang Dibeli</FormLabel>
+                    <FormLabel>Jumlah Item Terbeli</FormLabel>
                     <FormControl>
                       <Input placeholder="45" type="number" {...field} />
                     </FormControl>
@@ -241,7 +225,7 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
                 name="totalharga"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Total Harga yang Dibeli</FormLabel>
+                    <FormLabel>Total Harga Terbeli</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -304,7 +288,20 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
                   )}
                 />
               </div>
+              <FormField
+                control={form.control}
+                name="statuspembayaran"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status Pembayaran</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Status Pembayaran.." {...field} />
+                    </FormControl>
 
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <Button type="submit" className="mt-4 py-6">
                 Tambah Transaksi Penjualan
               </Button>
