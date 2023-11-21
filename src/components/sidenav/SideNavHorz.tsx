@@ -7,8 +7,7 @@ import {
   Building2,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
-import Logo from "@/components/main/logo/logo-dark.png";
+
 import { Link } from "@tanstack/react-router";
 
 function SideNavHorz() {

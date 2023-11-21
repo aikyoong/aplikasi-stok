@@ -1,5 +1,5 @@
-import { Router, Route, RootRoute, redirect } from "@tanstack/react-router";
-import useAuth from "@/store/useAuth";
+import { Router, Route, RootRoute } from "@tanstack/react-router";
+
 import Root from "./RootRouterWrapper";
 import Login from "@/pages/auth/Login";
 import Landing from "@/pages/landingpage/app";
@@ -20,31 +20,6 @@ const indexRoute = new Route({
   path: "/",
   component: Landing,
 });
-
-// About (pricing-page.tsx) route
-// const pricingPage = new Route({
-//   getParentRoute: () => rootRoute,
-//   path: "/pricing",
-//   component: PricingPage,
-// });
-
-// const orderPage = new Route({
-//   getParentRoute: () => rootRoute,
-//   path: "/order",
-//   component: Order,
-// });
-
-// const ThxPage = new Route({
-//   getParentRoute: () => rootRoute,
-//   path: "/thanks-order",
-//   component: ThxOrder,
-// });
-
-// const clientAreaRoute = new Route({
-//   getParentRoute: () => rootRoute,
-//   path: "/clientarea",
-//   component: ClientArea,
-// });
 
 const loginPage = new Route({
   getParentRoute: () => rootRoute,
@@ -80,24 +55,6 @@ const vendorRoute = new Route({
   component: Vendor,
 });
 
-const privateLayout = new Route({
-  getParentRoute: () => rootRoute,
-  id: "private",
-  beforeLoad: async () => {
-    const { isLoggedIn } = useAuth();
-
-    if (!isLoggedIn) {
-      throw redirect({
-        to: "/login",
-      });
-    }
-
-    return {
-      isLoggedIn,
-    };
-  },
-});
-
 // Create the router using your route tree
 export const router = new Router({
   routeTree: rootRoute.addChildren([
@@ -108,8 +65,5 @@ export const router = new Router({
     customerRoute,
     salesRoute,
     vendorRoute,
-    // privateLayout.addChildren([
-    //   clientAreaRoute.addChildren([invoiceClient, SubsClient]),
-    // ]),
   ]),
 });
