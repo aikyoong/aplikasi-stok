@@ -72,8 +72,27 @@ async function fetchKonsumen() {
   return data;
 }
 
+async function fetchMasterBarang() {
+  const { data, error } = await supabase.from("master_barang").select("*");
+  if (error) {
+    throw new Error("Could not fetch master_barang");
+  }
+  return data;
+}
+
 const TransactionForm = () => {
   const form = useForm({
+    resolver: zodResolver(formSetorSchema),
+    defaultValues: {
+      idkonsumen: "",
+      totalitem: "", // nilai awal sebagai string kosong
+      totalharga: "", // sesuaikan dengan tipe data yang diharapkan
+      tanggaltransaksi: "",
+      statuspembayaran: "",
+    },
+  });
+
+  const itemform = useForm({
     resolver: zodResolver(formSetorSchema),
     defaultValues: {
       idkonsumen: "",
@@ -87,6 +106,11 @@ const TransactionForm = () => {
   const { data: konsumenData, error: fetchError2 } = useQuery({
     queryKey: ["konsumen"],
     queryFn: fetchKonsumen,
+  });
+
+  const { data: dataProduk, error: fetchError } = useQuery({
+    queryKey: ["master_barang"],
+    queryFn: fetchMasterBarang,
   });
 
   const [items, setItems] = useState(initialItems);
@@ -125,7 +149,39 @@ const TransactionForm = () => {
     label: konsumen.nama_konsumen,
   }));
 
+  const productOptions = dataProduk?.map((product) => ({
+    value: product.kodebarang,
+    label: product.nama_barang,
+  }));
+
+  const statusPembayaranOptions = [
+    { value: "lunas", label: "Lunas" },
+    { value: "belum lunas", label: "Belum Lunas" },
+  ];
+
   function onSubmit(values) {
+    const {
+      totalitem,
+      totalharga,
+      tanggaltransaksi,
+      idkonsumen,
+      statuspembayaran,
+    } = values;
+
+    // Tambahkan waktu dan zona waktu ke tanggal
+    const tanggalTransaksiFormatted = `${tanggaltransaksi} 00:00:00+00`;
+
+    // addTransaksiPenjualan(
+    //   totalitem,
+    //   totalharga,
+    //   tanggaltransaksi,
+    //   idkonsumen,
+    //   statuspembayaran
+    // );
+
+    console.log("On Submitsss", values);
+  }
+  function onSubmit2(values) {
     const {
       totalitem,
       totalharga,
@@ -200,108 +256,172 @@ const TransactionForm = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label
-                    htmlFor="transactionDate"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Tanggal Transaksi
-                  </label>
-                  <input
-                    type="date"
-                    id="transactionDate"
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
+                  <div>
+                    <Label
+                      htmlFor="tanggaltransaksi"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Tanggal Transaksi
+                    </Label>
+                    <Controller
+                      control={form.control}
+                      name="tanggaltransaksi"
+                      render={({ field: { onChange, value } }) => (
+                        <Input
+                          type="date"
+                          onChange={onChange}
+                          value={value ?? ""} // Ensure value is never undefined
+                        />
+                      )}
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label
-                    htmlFor="paymentStatus"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Status Pembayaran
-                  </label>
-                  <select
-                    id="paymentStatus"
-                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  >
-                    <option>Select</option>
-                    {/* Map through payment status options here */}
-                  </select>
+                  <FormField
+                    control={form.control}
+                    name="statuspembayaran"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status Pembayaran</FormLabel>
+                        <FormControl>
+                          <Controller
+                            control={form.control}
+                            name="statuspembayaran"
+                            render={({ field }) => {
+                              const selectedValue =
+                                statusPembayaranOptions?.find(
+                                  (option) => option.value === field.value
+                                );
+
+                              return (
+                                <Select
+                                  {...field}
+                                  options={statusPembayaranOptions}
+                                  value={selectedValue}
+                                  onChange={(option) =>
+                                    field.onChange(option.value)
+                                  }
+                                />
+                              );
+                            }}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </form>
           </Form>
 
           {/* Items Section */}
-          <div className="md:col-span-4">
-            <h2 className="text-lg font-medium mb-3">Item</h2>
-            <table className="min-w-full divide-y divide-gray-200 mb-4">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="w-1/2 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nama Produk
-                  </th>
-                  <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Jumlah Barang
-                  </th>
-                  <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Harga Satuan
-                  </th>
-                  <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Total
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {items.map((item, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <select className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                        <option>Select Product</option>
-                        {/* Map through product options here */}
-                      </select>
-                    </td>
-                    <td className="px-2 py-4 whitespace-nowrap">
-                      <input
-                        type="number"
-                        className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        value={item.quantity}
-                        onChange={(e) => {
-                          // Handle quantity change
-                        }}
-                      />
-                    </td>
-                    <td className="px-2 py-4 whitespace-nowrap">
-                      <input
-                        type="number"
-                        className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                        value={item.unitPrice}
-                        onChange={(e) => {
-                          // Handle unit price change
-                        }}
-                      />
-                    </td>
-                    <td className="px-2 py-4 whitespace-nowrap text-center font-bold">
-                      {item.total.toLocaleString()}
-                    </td>
-                    <td className="px-2 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        X
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <button
-              className="py-2 mx-4 px-4 border text-blue-500 border-blue-600  font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none"
-              onClick={addItem}
-            >
-              + Tambah Item
-            </button>
-          </div>
+          <Form {...form}>
+            <div className="md:col-span-4">
+              <form onSubmit={itemform.handleSubmit(onSubmit)}>
+                <h2 className="text-lg font-medium mb-3">Item</h2>
+                <table className="min-w-full divide-y divide-gray-200 mb-4">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="w-1/2 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nama Produk
+                      </th>
+                      <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Jumlah Barang
+                      </th>
+                      <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Harga Satuan
+                      </th>
+                      <th className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Total
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {items.map((item, index) => (
+                      <tr key={index}>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          {/* <select className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                            <option>Select Product</option>
+                          </select> */}
+                          <FormField
+                            control={form.control}
+                            name="kode_barang"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Kode Barang</FormLabel>
+                                <FormControl>
+                                  <Controller
+                                    name="kode_barang"
+                                    control={form.control}
+                                    render={({ field }) => {
+                                      // Menentukan nilai yang dipilih berdasarkan field.value
+                                      const selectedValue = productOptions.find(
+                                        (option) => option.value === field.value
+                                      );
+
+                                      return (
+                                        <Select
+                                          {...field}
+                                          options={productOptions}
+                                          value={selectedValue}
+                                          onChange={(option) =>
+                                            field.onChange(option.value)
+                                          }
+                                        />
+                                      );
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormDescription>
+                                  Pilih Produk yang ingin ditambah stok nya
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </td>
+                        <td className="px-2 py-4 whitespace-nowrap">
+                          <input
+                            type="number"
+                            className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            value={item.quantity}
+                            onChange={(e) => {}}
+                          />
+                        </td>
+                        <td className="px-2 py-4 whitespace-nowrap">
+                          <input
+                            type="number"
+                            className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            value={item.unitPrice}
+                            onChange={(e) => {
+                              // Handle unit price change
+                            }}
+                          />
+                        </td>
+                        <td className="px-2 py-4 whitespace-nowrap text-center font-bold">
+                          {item.total.toLocaleString()}
+                        </td>
+                        <td className="px-2 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => removeItem(item.id)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            X
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <button
+                  className="py-2 mx-4 px-4 border text-blue-500 border-blue-600  font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none"
+                  onClick={addItem}
+                >
+                  + Tambah Item
+                </button>
+              </form>
+            </div>
+          </Form>
         </div>
 
         {/* Summary Section */}
