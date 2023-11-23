@@ -134,7 +134,7 @@ const HeaderPageAndAddProduct = ({ data, namaHalaman, desc, konsumen }) => {
           </h2>
 
           <span className="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full dark:bg-gray-800 dark:text-blue-400">
-            {data.length} pengguna
+            {data.length} penjualan
           </span>
         </div>
 
@@ -142,10 +142,10 @@ const HeaderPageAndAddProduct = ({ data, namaHalaman, desc, konsumen }) => {
       </div>
 
       <div className="flex items-center mt-4 gap-x-3">
-        <PopUpAddTransaksiPenjualan
+        {/* <PopUpAddTransaksiPenjualan
           namaHalaman={namaHalaman}
           dataKonsumen={konsumen}
-        />
+        /> */}
         <Link to="/tambah-penjualan">
           <button className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide blue-500 transition-colors duration-200 border-2 border-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600">
             <ListPlus />
