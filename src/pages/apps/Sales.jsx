@@ -89,7 +89,7 @@ async function deleteTransaksi(IDTransaksi) {
 
   if (status === 204) {
     console.log("success mendelete");
-    toast.success(`Sukses Menghapus produk dengan kode barang ${kodeBarang}`);
+    toast.success(`Sukses Menghapus produk dengan kode barang ${IDTransaksi}`);
   }
 
   console.log("Barang deleted:", data);
@@ -392,12 +392,12 @@ function Sales() {
 
       {
         id: "totalitem",
-        header: "Total Item Dibeli",
+        header: "Total Barang ",
         accessorKey: "totalitem", // accessor adalah "key" dalam data
       },
       {
         id: "totalharga",
-        header: "Total Harga Dibeli",
+        header: "Total Harga ",
         accessorKey: "totalharga", // accessor adalah "key" dalam data
       },
       {
@@ -424,7 +424,7 @@ function Sales() {
         header: "Action",
 
         cell: (cellProps) => {
-          const KodeBarangEachRow = cellProps.row.original.kodebarang;
+          const IDTransaksiEachRow = cellProps.row.original.idtransaksi;
           return (
             <Menubar className="max-w-[45px] mx-auto flex text-center justify-center">
               <MenubarMenu>
@@ -447,8 +447,16 @@ function Sales() {
                   </div>
                 </MenubarTrigger>
                 <MenubarContent>
+                  <Link
+                    to={"/penjualan/$idtransaksi"}
+                    params={{
+                      idtransaksi: IDTransaksiEachRow,
+                    }}
+                  >
+                    <MenubarItem>Lihat Detail</MenubarItem>
+                  </Link>
                   <MenubarItem
-                    onClick={() => deleteTransaksi(KodeBarangEachRow)}
+                    onClick={() => deleteTransaksi(IDTransaksiEachRow)}
                   >
                     Hapus
                   </MenubarItem>
