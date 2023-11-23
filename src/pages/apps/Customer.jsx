@@ -267,6 +267,11 @@ function Customer() {
   const columns = useMemo(
     () => [
       {
+        id: "idkonsumen",
+        header: "ID",
+        accessorKey: "idkonsumen", // accessor adalah "key" dalam data
+      },
+      {
         id: "nama_konsumen",
         header: "Nama Konsumen",
         accessorKey: "nama_konsumen", // accessor adalah "key" dalam data

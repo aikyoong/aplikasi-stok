@@ -51,9 +51,7 @@ const formSetorSchema = z.object({
       "Jumlah Total Harga Transaksi harus berupa angka positif dan tidak boleh dimulai dengan angka 0.",
   }),
   idkonsumen: z.number(),
-  tanggaltransaksi: z.number().refine((data) => !isNaN(Date.parse(data)), {
-    message: "Invalid date format",
-  }),
+  tanggaltransaksi: z.string(),
   statuspembayaran: z.string(),
 });
 
@@ -158,8 +156,8 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
     defaultValues: {
       totalitem: "", // nilai awal sebagai string kosong
       totalharga: "", // sesuaikan dengan tipe data yang diharapkan
-      idkonsumen: "",
       tanggaltransaksi: "",
+      idkonsumen: "",
       statuspembayaran: "",
     },
   });
@@ -168,16 +166,19 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
     const {
       totalitem,
       totalharga,
-      idkonsumen,
       tanggaltransaksi,
+      idkonsumen,
       statuspembayaran,
     } = values;
+
+    // Tambahkan waktu dan zona waktu ke tanggal
+    const tanggalTransaksiFormatted = `${tanggaltransaksi} 00:00:00+00`;
 
     addTransaksiPenjualan(
       totalitem,
       totalharga,
-      idkonsumen,
       tanggaltransaksi,
+      idkonsumen,
       statuspembayaran
     );
 
@@ -188,6 +189,11 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
     value: konsumen.idkonsumen,
     label: konsumen.nama_konsumen,
   }));
+  const statusPembayaranOptions = [
+    { value: "lunas", label: "Lunas" },
+    { value: "belum lunas", label: "Belum Lunas" },
+  ];
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -213,7 +219,7 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
                   <FormItem>
                     <FormLabel>Jumlah Item Terbeli</FormLabel>
                     <FormControl>
-                      <Input placeholder="45" type="number" {...field} />
+                      <Input placeholder="1" type="number" {...field} />
                     </FormControl>
 
                     <FormMessage />
@@ -268,7 +274,7 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
                       />
                     </FormControl>
                     <FormDescription>
-                      Pilih Produk yang ingin ditambah stok nya
+                      Pilih Konsumen yang membeli
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -295,10 +301,37 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
                   <FormItem>
                     <FormLabel>Status Pembayaran</FormLabel>
                     <FormControl>
-                      <Input placeholder="Status Pembayaran.." {...field} />
-                    </FormControl>
+                      <Controller
+                        control={form.control}
+                        name="statuspembayaran"
+                        // render={({ field }) => (
+                        //   <Select
+                        //     {...field}
+                        //     options={statusPembayaranOptions}
+                        //     onChange={(selectedOption) =>
+                        //       field.onChange(selectedOption.value)
+                        //     }
+                        //   />
+                        // )}
+                        render={({ field }) => {
+                          // Menentukan nilai yang dipilih berdasarkan field.value
+                          const selectedValue = statusPembayaranOptions?.find(
+                            (option) => option.value === field.value
+                          );
 
-                    <FormMessage />
+                          return (
+                            <Select
+                              {...field}
+                              options={statusPembayaranOptions}
+                              value={selectedValue}
+                              onChange={(option) =>
+                                field.onChange(option.value)
+                              }
+                            />
+                          );
+                        }}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />
@@ -331,14 +364,25 @@ function Sales() {
     setSearching(value);
   };
 
+  function formatDateTime(dateTimeStr) {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    const dateTime = new Date(dateTimeStr);
+    return dateTime.toLocaleDateString("id-ID", options);
+  }
+
   // Column Transaksi Penjuaan
   const columns = useMemo(
     () => [
       {
-        id: "email",
-        header: "ID Konsumen",
-        accessorKey: "idkonsumen", // accessor adalah "key" dalam data
+        id: "idtransaksi",
+        header: "ID Transaksi",
+        accessorKey: "idtransaksi", // accessor adalah "key" dalam data
       },
+
       {
         id: "totalitem",
         header: "Total Item Dibeli",
@@ -350,9 +394,23 @@ function Sales() {
         accessorKey: "totalharga", // accessor adalah "key" dalam data
       },
       {
+        id: "tanggaltransaksi",
+        header: "Tanggal Transaksi",
+        accessorKey: "tanggaltransaksi",
+        cell: (tanggal) => {
+          const formatGenerated = tanggal.row.original.tanggaltransaksi;
+          return <>{formatDateTime(formatGenerated)}</>;
+        },
+      },
+      {
         id: "statuspembayaran",
         header: "Status Pembayaran",
         accessorKey: "statuspembayaran", // accessor adalah "key" dalam data
+      },
+      {
+        id: "email",
+        header: "ID Konsumen",
+        accessorKey: "idkonsumen", // accessor adalah "key" dalam data
       },
       {
         id: "action",
@@ -396,6 +454,8 @@ function Sales() {
     ],
     []
   );
+
+  console.log("data", dataTransaksi);
 
   return (
     <Layout>
