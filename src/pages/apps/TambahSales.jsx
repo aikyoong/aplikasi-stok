@@ -43,7 +43,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as z from "zod";
-import { Link } from "@tanstack/react-router";
 
 const formSetorSchema = z.object({
   totalitem: z.string(),
@@ -129,29 +128,23 @@ const HeaderPageAndAddProduct = ({ data, namaHalaman, desc, konsumen }) => {
     <div className="sm:flex sm:items-center sm:justify-between mt-12">
       <div>
         <div className="flex items-center gap-x-3">
-          <h2 className="text-lg font-medium text-gray-800 dark:text-white capitalize">
+          <h2 className="text-2xl font-medium text-gray-800 dark:text-white capitalize">
             {namaHalaman}
           </h2>
 
-          <span className="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full dark:bg-gray-800 dark:text-blue-400">
+          {/* <span className="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full dark:bg-gray-800 dark:text-blue-400">
             {data.length} pengguna
-          </span>
+          </span> */}
         </div>
 
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-300">{desc}</p>
       </div>
 
       <div className="flex items-center mt-4 gap-x-3">
-        <PopUpAddTransaksiPenjualan
+        {/* <PopUpAddTransaksiPenjualan
           namaHalaman={namaHalaman}
           dataKonsumen={konsumen}
-        />
-        <Link to="/tambah-penjualan">
-          <button className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide blue-500 transition-colors duration-200 border-2 border-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600">
-            <ListPlus />
-            <span>Tambah Transaksi</span>
-          </button>
-        </Link>
+        /> */}
       </div>
     </div>
   );
@@ -196,6 +189,7 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
     value: konsumen.idkonsumen,
     label: konsumen.nama_konsumen,
   }));
+
   const statusPembayaranOptions = [
     { value: "lunas", label: "Lunas" },
     { value: "belum lunas", label: "Belum Lunas" },
@@ -354,7 +348,7 @@ function PopUpAddTransaksiPenjualan({ namaHalaman, dataKonsumen }) {
 }
 
 // KOMPONEN + PAGE
-function Sales() {
+function TambahSales() {
   // Fetching
   const { data: dataTransaksi, error: fetchError } = useQuery({
     queryKey: ["transaksi_penjualan"],
@@ -364,12 +358,6 @@ function Sales() {
     queryKey: ["konsumen"],
     queryFn: fetchKonsumen,
   });
-
-  // Searching
-  const [searching, setSearching] = useState("");
-  const handleSearchChange = (value) => {
-    setSearching(value);
-  };
 
   function formatDateTime(dateTimeStr) {
     const options = {
@@ -472,24 +460,14 @@ function Sales() {
           <HeaderPageAndAddProduct
             data={dataTransaksi}
             konsumen={konsumenData}
-            namaHalaman="Transaksi Penjualan"
-            desc="Tambahkan transaksi penjualan yang beredar di perushaan."
+            namaHalaman="Tambah Transaksi"
           />
-          <SearchAndFiltering
-            searching={searching}
-            setSearching={handleSearchChange}
-            placeholder="Cari Transaksi"
-          />
-          <V8TableContainer
-            data={dataTransaksi}
-            columns={columns}
-            searching={searching}
-            setSearching={handleSearchChange}
-          />
+
+          <V8TableContainer data={dataTransaksi} columns={columns} />
         </div>
       )}
     </Layout>
   );
 }
 
-export default Sales;
+export default TambahSales;
