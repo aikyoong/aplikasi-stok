@@ -27,6 +27,7 @@ const config = {
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
         philoshoper: ["Philosopher", "sans-serif"],
+        montserrat: ["Montserrat", "sans-serif"],
       },
     },
   },

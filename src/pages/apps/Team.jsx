@@ -43,16 +43,19 @@ function Team() {
   };
   // Tim
   const fetchTim = async () => {
-    const { data, error } = await supabase.from("login").select("*");
+    const { data, error } = await supabase.from("auth.user").select("*");
     if (error) {
       throw new Error("Could not fetch login");
     }
     return data;
   };
+
   const { data: dataTim, error: fetchError } = useQuery({
-    queryKey: ["login"],
+    queryKey: ["users"],
     queryFn: fetchTim,
   });
+
+  console.log("timmm", dataTim);
   // Column Tim
   const columns = useMemo(
     () => [
@@ -98,21 +101,21 @@ function Team() {
       {dataTim && (
         <div className="max-w-5xl mx-auto">
           <HeaderPageAndAddProduct
-            data={dataTim}
+            // data={dataTim}
             namaHalaman="Tim"
             desc="Berikut adalah daftar pengguna aplikasi ini."
           />
-          <SearchAndFiltering
+          {/* <SearchAndFiltering
             searching={searching}
             setSearching={handleSearchChange}
             placeholder="Cari Tim"
-          />
-          <V8TableContainer
+          /> */}
+          {/* <V8TableContainer
             data={dataTim}
             columns={columns}
             searching={searching}
             setSearching={handleSearchChange}
-          />
+          /> */}
         </div>
       )}
     </Layout>

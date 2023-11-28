@@ -37,10 +37,13 @@ import toast from "react-hot-toast";
 import supabase from "@/config/supabaseClient";
 import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import useAuth from "@/store/useAuth";
 import { RefreshCw, ListPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
+import { Outlet, redirect, useNavigate } from "@tanstack/react-router";
+
 import * as z from "zod";
 
 // SCHEMA VALIDATION
@@ -522,6 +525,15 @@ function PopUpAddSetorProduct({ namaHalaman, dataExisitngProduk, dataVendor }) {
 
 // KOMPONEN + PAGE
 function Produk() {
+  const navigate = useNavigate({ from: "/produk" });
+
+  const { isLoggedIn } = useAuth();
+  if (isLoggedIn === false) {
+    setTimeout(() => {
+      navigate({ to: "/" });
+    }, 1200);
+  }
+
   // Fetching
   const { data: masterBarang, error: fetchError } = useQuery({
     queryKey: ["master_barang"],
