@@ -119,6 +119,7 @@ async function addItemTransaksi(array) {
 const TransactionForm = () => {
   const form = useForm({
     defaultValues: {
+      statuspembayaran: "",
       items: [{ productName: "", quantity: 0, unitPrice: 0, total: 0 }],
     },
   });
@@ -330,7 +331,7 @@ const TransactionForm = () => {
                   </div>
                 </div>
                 <div>
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="statuspembayaran"
                     render={({ field }) => (
@@ -359,6 +360,26 @@ const TransactionForm = () => {
                             }}
                           />
                         </FormControl>
+                      </FormItem>
+                    )}
+                  /> */}
+                  <FormField
+                    control={form.control}
+                    name="statuspembayaran"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status Pembayaran</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Status Pembayaran"
+                            {...field}
+                            value={field.value || ""}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Cantumkan status pembayaran.
+                        </FormDescription>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
