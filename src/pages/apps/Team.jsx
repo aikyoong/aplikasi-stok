@@ -43,7 +43,7 @@ function Team() {
   };
   // Tim
   const fetchTim = async () => {
-    const { data, error } = await supabase.from("auth.user").select("*");
+    const { data, error } = await supabase.from("login").select("*");
     if (error) {
       throw new Error("Could not fetch login");
     }
@@ -101,21 +101,21 @@ function Team() {
       {dataTim && (
         <div className="max-w-5xl mx-auto">
           <HeaderPageAndAddProduct
-            // data={dataTim}
+            data={dataTim}
             namaHalaman="Tim"
             desc="Berikut adalah daftar pengguna aplikasi ini."
           />
-          {/* <SearchAndFiltering
+          <SearchAndFiltering
             searching={searching}
             setSearching={handleSearchChange}
             placeholder="Cari Tim"
-          /> */}
-          {/* <V8TableContainer
+          />
+          <V8TableContainer
             data={dataTim}
             columns={columns}
             searching={searching}
             setSearching={handleSearchChange}
-          /> */}
+          />
         </div>
       )}
     </Layout>

@@ -9,7 +9,8 @@ import Produk from "@/pages/apps/Product";
 import Sales from "@/pages/apps/Sales";
 import Vendor from "@/pages/apps/Vendor";
 import TambahSales from "@/pages/apps/TambahSales";
-import TransactionForm from "@/pages/apps/ExTambahSales";
+import TransactionForm from "@/pages/apps/PageTambahPenjualan";
+import SetorProduk from "@/pages/apps/PageSetorProduk";
 
 // Root
 const rootRoute = new RootRoute({
@@ -39,6 +40,11 @@ const productRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/produk",
   component: Produk,
+});
+const setorProductRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/setor-barang",
+  component: SetorProduk,
 });
 
 const customerRoute = new Route({
@@ -193,5 +199,6 @@ export const router = new Router({
     vendorRoute,
     addSalesRoute,
     detailSales,
+    setorProductRoute,
   ]),
 });

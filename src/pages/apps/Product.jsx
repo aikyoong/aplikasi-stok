@@ -42,7 +42,7 @@ import { RefreshCw, ListPlus } from "lucide-react";
 import { motion } from "framer-motion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
-import { Outlet, redirect, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 
 import * as z from "zod";
 
@@ -150,7 +150,7 @@ async function addSetorPembelian(
   kodebarang
 ) {
   const { data, error, status } = await supabase
-    .from("pembelian_barang")
+    .from("transaksi_pembelian")
     .insert([{ jumlah, tanggal_pembelian, totalharga, idvendor, kodebarang }]);
 
   if (error) {
@@ -186,11 +186,19 @@ const HeaderPageAndAddProduct = ({ data, namaHalaman, desc, vendor }) => {
       </div>
 
       <div className="flex items-center mt-4 gap-x-3">
-        <PopUpAddSetorProduct
+        {/* <PopUpAddSetorProduct
           namaHalaman={namaHalaman}
           dataExisitngProduk={data}
           dataVendor={vendor}
-        />
+        /> */}
+        <Link to={"/setor-barang"}>
+          {" "}
+          <button className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide blue-500 transition-colors duration-200 border-2 border-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600">
+            <ListPlus />
+
+            <span>Setor Barang</span>
+          </button>
+        </Link>
         <PopUpAddProduct namaHalaman={namaHalaman} />
       </div>
     </div>
